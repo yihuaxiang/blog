@@ -4,11 +4,34 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var url=require("url");
+
+//加载session模块
+var session=require("express-session");
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+//session验证
+app.use(session({
+	"secret":"my secret string",
+	maxAge:3600000
+}))
+app.use(function(req,res,next){
+	var urlObj=url.parse(req.url);
+	// console.log(urlObj.pathname);
+	if(urlObj.pathname == "/login"){
+		next();
+	}else{
+		if(req.session.uid){
+			next();
+		}else{
+			res.redirect("/login");
+		}
+	}
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
